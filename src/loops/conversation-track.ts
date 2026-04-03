@@ -14,7 +14,7 @@ import { canReply, recordReply } from "../core/rate-limiter.js";
 import { isConfigured as isIMessageConfigured, sendMessage } from "../imessage.js";
 import { isPostSeen, markPostSeen } from "../store.js";
 import type { PostResult } from "../x-client.js";
-import { searchPosts } from "../x-client.js";
+import { getPost, searchPosts } from "../x-client.js";
 
 const LOOP_NAME = "CONVO";
 const MAX_POST_AGE_MINUTES = 360; // Track conversations up to 6 hours
@@ -45,7 +45,7 @@ async function fetchRepliesToUs(client: TwitterApi, handle: string): Promise<Arr
   }
 }
 
-function processMention(post: PostResult): void {
+async function processMention(post: PostResult, client: TwitterApi): Promise<void> {
   markPostSeen(post.id, post.author_username, post.text, post.likes, post.replies);
 
   logDiscovery({
@@ -57,16 +57,31 @@ function processMention(post: PostResult): void {
 
   if (!canReply(post.author_username, LOOP_NAME)) return;
 
+  // Fetch the parent conversation for context
+  let conversationContext = "";
+  if (post.conversation_id && post.conversation_id !== post.id) {
+    try {
+      const parent = await getPost(client, post.conversation_id);
+      if (parent) {
+        conversationContext = `\nOriginal post by @${parent.author_username}: "${parent.text}"`;
+      }
+    } catch {
+      // OK to proceed without parent context
+    }
+  }
+
   const drafts = draftReplies({
     author: post.author_username,
     text: post.text,
     context: [
-      "This person mentioned us or replied to one of our posts.",
-      "Draft a follow-up response that keeps the conversation going.",
-      "Be helpful, genuine, and specific to what they said.",
+      `This person mentioned us or replied to one of our posts.${conversationContext}`,
+      "Read their message carefully — understand what they're actually saying before responding.",
+      "Match the tone and energy of their message exactly.",
+      "If it's a short casual reply, keep your response short and casual too.",
       "If they asked a question, answer it directly.",
       "If they shared feedback, acknowledge it specifically.",
-      "If they tagged us in a recommendation thread, thank them naturally without being over-the-top.",
+      "If they're just vibing or agreeing with something, respond in kind — don't overthink it.",
+      "Do NOT reply with generic appreciation if they made a specific point.",
       "Keep the conversational thread alive — end with something that invites further exchange.",
     ].join(" "),
   });
@@ -144,7 +159,7 @@ export async function runCycle(client: TwitterApi): Promise<void> {
 
     for (const post of newConversations) {
       try {
-        processMention(post);
+        await processMention(post, client);
       } catch (err) {
         logError({
           loop: LOOP_NAME,

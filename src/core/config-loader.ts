@@ -33,16 +33,19 @@ export interface PersonaConfig {
 }
 
 export interface StrategyConfig {
-  loops: Record<string, {
-    enabled: boolean;
-    interval_seconds?: number;
-    max_replies_per_day?: number;
-    max_likes_per_day?: number;
-    max_light_replies_per_day?: number;
-    posts_per_day?: number;
-    schedule?: Array<string>;
-    mention_product?: boolean;
-  }>;
+  loops: Record<
+    string,
+    {
+      enabled: boolean;
+      interval_seconds?: number;
+      max_replies_per_day?: number;
+      max_likes_per_day?: number;
+      max_light_replies_per_day?: number;
+      posts_per_day?: number;
+      schedule?: Array<string>;
+      mention_product?: boolean;
+    }
+  >;
   global: {
     max_total_replies_per_day: number;
     max_same_author_per_day: number;
@@ -152,7 +155,8 @@ export function getStrategy(): StrategyConfig {
         max_replies_per_day: global.max_total_replies_per_day ?? 25,
         max_replies_per_author_per_day: global.max_same_author_per_day ?? 1,
         max_replies_per_loop_per_day: 10,
-        max_likes_per_day: (loops.casual_engage as Record<string, unknown>)?.max_likes_per_day as number ?? 30,
+        max_likes_per_day:
+          ((loops.casual_engage as Record<string, unknown>)?.max_likes_per_day as number) ?? 30,
       },
     };
   } catch {
