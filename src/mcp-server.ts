@@ -2,24 +2,24 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
 import {
-  createXClient,
-  searchPosts,
-  getPost,
-  getThread,
-  getUserPosts,
-  postReply,
-  likeTweet,
-} from "./x-client.js";
-import {
-  isPostSeen,
-  markPostSeen,
-  logReply,
   getRepliedAuthorsToday,
   getRepliesTodayCount,
   getStats,
+  isPostSeen,
+  logReply,
+  markPostSeen,
 } from "./store.js";
+import {
+  createXClient,
+  getPost,
+  getThread,
+  getUserPosts,
+  likeTweet,
+  postReply,
+  searchPosts,
+} from "./x-client.js";
 
-const client = createXClient();
+const client = await createXClient();
 
 const server = new McpServer({
   name: "x-agent",
@@ -33,12 +33,7 @@ server.tool(
   "Search X for recent posts matching a query. Use 'from:username' to search specific accounts. Combine with keywords, e.g. 'from:borischerny AI editor'",
   {
     query: z.string().describe("X search query"),
-    max_results: z
-      .number()
-      .min(1)
-      .max(100)
-      .default(10)
-      .describe("Max results (default 10)"),
+    max_results: z.number().min(1).max(100).default(10).describe("Max results (default 10)"),
   },
   async ({ query, max_results }) => {
     const posts = await searchPosts(client, query, max_results);
@@ -49,16 +44,14 @@ server.tool(
     return {
       content: [{ type: "text", text: JSON.stringify(posts, null, 2) }],
     };
-  }
+  },
 );
 
 server.tool(
   "get_post",
   "Get a single X post by ID or URL. Extracts post ID from URLs automatically.",
   {
-    post_id: z
-      .string()
-      .describe("Tweet ID or full X URL (e.g. https://x.com/user/status/123456)"),
+    post_id: z.string().describe("Tweet ID or full X URL (e.g. https://x.com/user/status/123456)"),
   },
   async ({ post_id }) => {
     // Extract ID from URL if needed
@@ -73,7 +66,7 @@ server.tool(
     return {
       content: [{ type: "text", text: JSON.stringify(post, null, 2) }],
     };
-  }
+  },
 );
 
 server.tool(
@@ -90,7 +83,7 @@ server.tool(
     return {
       content: [{ type: "text", text: JSON.stringify(thread, null, 2) }],
     };
-  }
+  },
 );
 
 server.tool(
@@ -108,7 +101,7 @@ server.tool(
     return {
       content: [{ type: "text", text: JSON.stringify(posts, null, 2) }],
     };
-  }
+  },
 );
 
 server.tool(
@@ -163,12 +156,12 @@ server.tool(
               today_total: todayCount + 1,
             },
             null,
-            2
+            2,
           ),
         },
       ],
     };
-  }
+  },
 );
 
 server.tool(
@@ -180,11 +173,9 @@ server.tool(
   async ({ post_id }) => {
     const liked = await likeTweet(client, post_id);
     return {
-      content: [
-        { type: "text", text: liked ? "Liked successfully" : "Already liked or failed" },
-      ],
+      content: [{ type: "text", text: liked ? "Liked successfully" : "Already liked or failed" }],
     };
-  }
+  },
 );
 
 server.tool(
@@ -198,9 +189,7 @@ server.tool(
     const query = usernames.map((u) => `from:${u}`).join(" OR ");
     const allPosts = await searchPosts(client, `(${query}) -is:reply -is:retweet`, 50);
 
-    const newPosts = allPosts.filter(
-      (p) => p.age_minutes <= minutes && !isPostSeen(p.id)
-    );
+    const newPosts = allPosts.filter((p) => p.age_minutes <= minutes && !isPostSeen(p.id));
 
     for (const post of newPosts) {
       markPostSeen(post.id, post.author_username, post.text, post.likes, post.replies);
@@ -213,12 +202,12 @@ server.tool(
           text: JSON.stringify(
             { new_posts: newPosts, checked: usernames.length, total_found: allPosts.length },
             null,
-            2
+            2,
           ),
         },
       ],
     };
-  }
+  },
 );
 
 server.tool(
@@ -230,7 +219,7 @@ server.tool(
     return {
       content: [{ type: "text", text: JSON.stringify(stats, null, 2) }],
     };
-  }
+  },
 );
 
 // --- Start ---

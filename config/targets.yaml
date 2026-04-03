@@ -1,5 +1,11 @@
-# Tier 1: High-priority accounts — reply within 2 minutes
-# These are the people whose posts get the most visibility in your niche
+# ═══════════════════════════════════════════════════════════════
+# X Engagement Targets — Edit this file any time, daemon picks
+# up changes automatically on next poll cycle.
+# ═══════════════════════════════════════════════════════════════
+
+# TIER 1: Reply within 1 minute
+# High-priority accounts — the ones that move your niche.
+# These get macOS notifications + instant pre-drafted replies.
 priority_accounts:
   - handle: "borischerny"
     context: "Creator of Claude Code. Posts about AI dev tools, CLI design, agent architecture."
@@ -13,37 +19,92 @@ priority_accounts:
     angles:
       - "Practical AI-assisted development from a builder's perspective"
       - "Code editor as the AI-native interface"
-      - "Real performance data from building with AI tools"
+
+  - handle: "mattpocockuk"
+    context: "TypeScript educator, AI Hero founder. Posts about dev tools, TypeScript, AI coding."
+    angles:
+      - "Developer experience in AI-native editors"
+      - "TypeScript tooling and type safety in AI workflows"
 
   - handle: "swyx"
-    context: "AI Engineer community leader. Posts about AI tooling ecosystem and developer experience."
+    context: "AI Engineer community leader. Posts about AI tooling ecosystem."
     angles:
       - "Desktop-native vs cloud AI tools"
       - "AI engineering patterns in practice"
-      - "Building in public perspective"
 
-  # Add more priority accounts here:
+  # Add more priority accounts below:
   # - handle: "username"
-  #   context: "Who they are and what they post about"
+  #   context: "Who they are"
   #   angles:
-  #     - "Your unique angle when replying to them"
+  #     - "Your angle when replying"
 
-# Tier 2: Monitor accounts — reply within 15 minutes
-# Good opportunities but lower urgency
+# TIER 2: Reply within 15 minutes
+# Good accounts in your niche — check less frequently.
 monitor_accounts:
   - handle: "levelsio"
   - handle: "alexalbert__"
+  - handle: "rauchg"
   - handle: "aaborel"
+  - handle: "nickcammarata"
+  - handle: "kepano"
   # Add more handles here
 
-# Keywords to search for (used in keyword scan mode)
-keywords:
-  - "AI code editor"
-  - "coding assistant"
-  - "developer tools AI"
-  - "vscode alternative"
-  - "cursor vs"
-  - "claude code"
-  - "AI pair programming"
-  - "tauri app"
-  - "code editor rust"
+# ═══════════════════════════════════════════════════════════════
+# DISCOVERY — Find NEW accounts you don't follow yet
+# The daemon searches these keywords every 15 minutes and
+# surfaces posts from accounts with good engagement signals.
+# ═══════════════════════════════════════════════════════════════
+discovery:
+  keywords:
+    - "AI code editor"
+    - "coding assistant"
+    - "developer tools AI"
+    - "vscode alternative"
+    - "cursor vs"
+    - "claude code"
+    - "AI pair programming"
+    - "tauri app"
+    - "building a code editor"
+    - "dev tools startup"
+    - "AI IDE"
+    - "coding with AI agents"
+
+  # Only surface discovery posts that meet these thresholds
+  min_likes: 10
+  min_followers: 500
+  max_age_minutes: 120
+  # Ignore these accounts in discovery (bots, spam, already following)
+  ignore_accounts:
+    - "Orbitbuild"
+
+# ═══════════════════════════════════════════════════════════════
+# COMMUNITY — Accounts you're actively building relationships with.
+# These get conversation follow-ups when they reply to you or
+# when you want to maintain the connection.
+# ═══════════════════════════════════════════════════════════════
+community:
+  - handle: "borischerny"
+    relationship: "Building on his platform (Claude Code). Engaged multiple times."
+  # Add accounts as you build relationships:
+  # - handle: "username"
+  #   relationship: "Context about your interaction history"
+
+# ═══════════════════════════════════════════════════════════════
+# SETTINGS
+# ═══════════════════════════════════════════════════════════════
+settings:
+  # How often to poll (seconds)
+  priority_poll_interval: 45
+  monitor_poll_interval: 300
+  discovery_poll_interval: 900
+
+  # Daily limits
+  max_replies_per_day: 20
+  max_discovery_replies_per_day: 5
+
+  # Notifications
+  notification_sound: "Ping"
+
+  # Working hours (don't poll outside these)
+  start_hour: 7
+  end_hour: 23

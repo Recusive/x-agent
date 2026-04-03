@@ -1,8 +1,13 @@
 #!/bin/bash
-# x-reply.sh — Interactive reply picker
-# Shows queued posts with pre-drafted replies. Pick a number to post.
+# ═══════════════════════════════════════════════════════════════
+# x-reply.sh — Review queued posts and post replies via Chrome
+#
+# Shows posts detected by the daemon with pre-drafted replies.
+# Pick a number to copy to clipboard + open in browser,
+# or use Chrome automation via Claude Code.
 #
 # Usage: ./scripts/x-reply.sh
+# ═══════════════════════════════════════════════════════════════
 
 set -euo pipefail
 
@@ -20,14 +25,16 @@ PENDING=$(find "$QUEUE_DIR" -name "*.json" -type f 2>/dev/null | wc -l | tr -d '
 
 if [ "$PENDING" -eq 0 ]; then
   echo "No pending posts in queue."
-  echo "Make sure x-monitor.sh is running."
+  echo "Start the daemon: ./scripts/x-daemon.sh"
   exit 0
 fi
 
+# Sort by tier (priority first) then by age
+echo ""
 echo "📬 $PENDING post(s) waiting for reply:"
 echo ""
 
-for f in "$QUEUE_DIR"/*.json; do
+for f in $(ls -t "$QUEUE_DIR"/*.json 2>/dev/null); do
   [ -f "$f" ] || continue
 
   AUTHOR=$(jq -r '.post.author_username' "$f" 2>/dev/null || echo "unknown")
@@ -35,11 +42,22 @@ for f in "$QUEUE_DIR"/*.json; do
   AGE=$(jq -r '.post.age_minutes' "$f" 2>/dev/null || echo "?")
   LIKES=$(jq -r '.post.likes' "$f" 2>/dev/null || echo "0")
   REPLIES=$(jq -r '.post.replies' "$f" 2>/dev/null || echo "0")
+  TIER=$(jq -r '.tier // "unknown"' "$f" 2>/dev/null)
   POST_ID=$(jq -r '.post.id' "$f" 2>/dev/null)
+  URL="https://x.com/$AUTHOR/status/$POST_ID"
+
+  # Tier badge
+  case $TIER in
+    priority)  BADGE="🔴 PRIORITY" ;;
+    monitor)   BADGE="🟡 MONITOR" ;;
+    discovery) BADGE="🟢 DISCOVERY" ;;
+    *)         BADGE="⚪ $TIER" ;;
+  esac
 
   echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-  echo "  @$AUTHOR (${AGE}m ago) — ♥ $LIKES  💬 $REPLIES"
+  echo "  $BADGE — @$AUTHOR (${AGE}m ago) — ♥ $LIKES  💬 $REPLIES"
   echo "  $TEXT"
+  echo "  $URL"
   echo ""
 
   # Show drafts
@@ -51,31 +69,38 @@ for f in "$QUEUE_DIR"/*.json; do
     echo ""
   done
 
-  read -rp "  Post which? (1/2/3/custom/skip/quit): " CHOICE
+  read -rp "  Pick (1/2/3), type custom, 'open' to view, skip, quit: " CHOICE
 
   case $CHOICE in
     1|2|3)
       IDX=$((CHOICE - 1))
       REPLY_TEXT=$(jq -r ".drafts[$IDX].text" "$f" 2>/dev/null)
 
+      # Copy to clipboard
+      echo -n "$REPLY_TEXT" | pbcopy
+
       echo ""
-      echo "  Posting: \"$REPLY_TEXT\""
-
-      cd "$AGENT_DIR" && claude -p "Use the post_reply tool to reply to post $POST_ID with this exact text: \"$REPLY_TEXT\"" \
-        --allowedTools "mcp__x-agent__post_reply" 2>/dev/null
-
-      echo "  ✓ Posted!"
+      echo "  📋 Copied to clipboard: \"$REPLY_TEXT\""
+      echo "  🌐 Opening post..."
+      open "$URL"
+      echo ""
+      echo "  → Click reply box → Cmd+V → Post"
+      echo "  (Or use 'x engage' in Claude Code for browser automation)"
+      echo ""
       rm "$f"
+      ;;
+    open)
+      open "$URL"
+      echo "  Opened in browser. Come back to pick a reply."
       ;;
     custom)
       echo ""
       read -rp "  Your reply: " CUSTOM_TEXT
-      echo "  Posting: \"$CUSTOM_TEXT\""
-
-      cd "$AGENT_DIR" && claude -p "Use the post_reply tool to reply to post $POST_ID with this exact text: \"$CUSTOM_TEXT\"" \
-        --allowedTools "mcp__x-agent__post_reply" 2>/dev/null
-
-      echo "  ✓ Posted!"
+      echo -n "$CUSTOM_TEXT" | pbcopy
+      echo "  📋 Copied to clipboard"
+      echo "  🌐 Opening post..."
+      open "$URL"
+      echo "  → Click reply box → Cmd+V → Post"
       rm "$f"
       ;;
     skip)

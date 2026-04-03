@@ -8,7 +8,7 @@ import { createXClient } from "./x-client.js";
 async function main(): Promise<void> {
   console.log("Testing X API authentication...\n");
 
-  const client = createXClient();
+  const client = await createXClient();
 
   // Test 1: Get authenticated user
   const me = await client.v2.me({
@@ -16,12 +16,8 @@ async function main(): Promise<void> {
   });
 
   console.log(`Authenticated as: @${me.data.username} (${me.data.name})`);
-  console.log(
-    `Followers: ${me.data.public_metrics?.followers_count ?? "unknown"}`
-  );
-  console.log(
-    `Following: ${me.data.public_metrics?.following_count ?? "unknown"}`
-  );
+  console.log(`Followers: ${me.data.public_metrics?.followers_count ?? "unknown"}`);
+  console.log(`Following: ${me.data.public_metrics?.following_count ?? "unknown"}`);
   console.log(`Tweets: ${me.data.public_metrics?.tweet_count ?? "unknown"}`);
 
   // Test 2: Search (read access)

@@ -6,3 +6,4 @@ logs/
 queue/*.json
 bun.lockb
 *.log
+data/oauth2-tokens.json

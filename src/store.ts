@@ -1,6 +1,6 @@
 import { Database } from "bun:sqlite";
-import { mkdirSync } from "fs";
-import { dirname } from "path";
+import { mkdirSync } from "node:fs";
+import { dirname } from "node:path";
 
 const DB_PATH = new URL("../data/x-agent.db", import.meta.url).pathname;
 
@@ -45,12 +45,12 @@ export function markPostSeen(
   authorUsername: string,
   text: string,
   likes: number,
-  replies: number
+  replies: number,
 ): void {
   db.run(
     `INSERT OR IGNORE INTO seen_posts (tweet_id, author_username, text, likes, replies)
      VALUES (?, ?, ?, ?, ?)`,
-    [tweetId, authorUsername, text, likes, replies]
+    [tweetId, authorUsername, text, likes, replies],
   );
 }
 
@@ -58,12 +58,12 @@ export function logReply(
   replyId: string,
   tweetId: string,
   authorUsername: string,
-  replyText: string
+  replyText: string,
 ): void {
   db.run(
     `INSERT OR IGNORE INTO posted_replies (reply_id, tweet_id, author_username, reply_text)
      VALUES (?, ?, ?, ?)`,
-    [replyId, tweetId, authorUsername, replyText]
+    [replyId, tweetId, authorUsername, replyText],
   );
 
   // Update daily stats
@@ -71,16 +71,16 @@ export function logReply(
   db.run(
     `INSERT INTO daily_stats (date, replies_posted) VALUES (?, 1)
      ON CONFLICT(date) DO UPDATE SET replies_posted = replies_posted + 1`,
-    [today]
+    [today],
   );
 }
 
-export function getRepliedAuthorsToday(): string[] {
+export function getRepliedAuthorsToday(): Array<string> {
   const today = new Date().toISOString().split("T")[0];
   const rows = db
     .query(
       `SELECT DISTINCT author_username FROM posted_replies
-       WHERE date(posted_at) = ?`
+       WHERE date(posted_at) = ?`,
     )
     .all(today) as Array<{ author_username: string }>;
   return rows.map((r) => r.author_username);
@@ -88,9 +88,9 @@ export function getRepliedAuthorsToday(): string[] {
 
 export function getRepliesTodayCount(): number {
   const today = new Date().toISOString().split("T")[0];
-  const row = db
-    .query("SELECT replies_posted FROM daily_stats WHERE date = ?")
-    .get(today) as { replies_posted: number } | null;
+  const row = db.query("SELECT replies_posted FROM daily_stats WHERE date = ?").get(today) as {
+    replies_posted: number;
+  } | null;
   return row?.replies_posted ?? 0;
 }
 
@@ -102,9 +102,7 @@ export function getRecentReplies(limit: number = 20): Array<{
   posted_at: string;
 }> {
   return db
-    .query(
-      `SELECT * FROM posted_replies ORDER BY posted_at DESC LIMIT ?`
-    )
+    .query(`SELECT * FROM posted_replies ORDER BY posted_at DESC LIMIT ?`)
     .all(limit) as Array<{
     reply_id: string;
     tweet_id: string;
@@ -127,9 +125,9 @@ export function getStats(): {
   const todayReplies = getRepliesTodayCount();
   const authorsToday = getRepliedAuthorsToday();
 
-  const totalRow = db
-    .query("SELECT COUNT(*) as count FROM posted_replies")
-    .get() as { count: number };
+  const totalRow = db.query("SELECT COUNT(*) as count FROM posted_replies").get() as {
+    count: number;
+  };
 
   const recent = getRecentReplies(10);
 

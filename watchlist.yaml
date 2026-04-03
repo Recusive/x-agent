@@ -1,0 +1,12 @@
+# Watchlist — Add accounts to monitor. Agent alerts you when they post.
+# Edit any time, changes picked up on next poll cycle.
+
+accounts:
+  - borischerny
+  - karpathy
+  - mattpocockuk
+  - swyx
+  - levelsio
+  - alexalbert__
+  - rauchg
+  - kepano

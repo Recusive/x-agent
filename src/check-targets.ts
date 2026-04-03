@@ -4,10 +4,10 @@
  * Outputs JSON to stdout: { new_posts: [...] } or { status: "quiet" }
  */
 
-import { readFileSync } from "fs";
+import { readFileSync } from "node:fs";
 import { parse } from "yaml";
-import { createXClient, searchPosts } from "./x-client.js";
 import { isPostSeen, markPostSeen } from "./store.js";
+import { createXClient, searchPosts } from "./x-client.js";
 
 const CONFIG_PATH = new URL("../config/targets.yaml", import.meta.url).pathname;
 
@@ -15,10 +15,10 @@ interface TargetConfig {
   priority_accounts: Array<{
     handle: string;
     context: string;
-    angles: string[];
+    angles: Array<string>;
   }>;
   monitor_accounts: Array<{ handle: string }>;
-  keywords: string[];
+  keywords: Array<string>;
 }
 
 function loadTargets(): TargetConfig {
@@ -28,7 +28,7 @@ function loadTargets(): TargetConfig {
 
 async function main(): Promise<void> {
   const targets = loadTargets();
-  const client = createXClient();
+  const client = await createXClient();
 
   // Combine all accounts into one search query
   const allHandles = [
@@ -55,7 +55,7 @@ async function main(): Promise<void> {
   // Enrich with target context (angles for priority accounts)
   const enriched = newPosts.map((post) => {
     const priority = targets.priority_accounts.find(
-      (a) => a.handle.toLowerCase() === post.author_username.toLowerCase()
+      (a) => a.handle.toLowerCase() === post.author_username.toLowerCase(),
     );
     return {
       ...post,
