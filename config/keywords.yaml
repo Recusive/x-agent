@@ -1,0 +1,74 @@
+# ═══════════════════════════════════════════════════════════════
+# X Agent Keywords — Search terms organized by purpose.
+# Used by niche_engage, solution_hunt, and content_create loops.
+# Edit any time, changes picked up on next poll cycle.
+# ═══════════════════════════════════════════════════════════════
+
+# ─── NICHE ─────────────────────────────────────────────────────
+# Terms about our space. Used by niche_engage loop to find
+# conversations we should be part of.
+niche:
+  - "AI code editor"
+  - "AI IDE"
+  - "AI coding assistant"
+  - "AI pair programming"
+  - "coding with AI agents"
+  - "claude code"
+  - "AI dev tools"
+  - "developer tools AI"
+  - "tauri app"
+  - "tauri desktop"
+  - "building a code editor"
+  - "vscode alternative"
+  - "code editor architecture"
+  - "AI-native editor"
+  - "agent-powered development"
+  - "AI workflow for developers"
+  - "dev tools startup"
+  - "native desktop app"
+  - "rust desktop app"
+
+# ─── SOLUTION QUERIES ──────────────────────────────────────────
+# People actively ASKING for tools. These are high-intent posts
+# where a helpful reply with a product mention is natural.
+# Used by solution_hunt loop.
+solution_queries:
+  - "looking for AI code editor"
+  - "looking for a coding assistant"
+  - "anyone recommend code editor"
+  - "anyone recommend AI IDE"
+  - "best alternative to vscode"
+  - "best alternative to cursor"
+  - "frustrated with cursor"
+  - "frustrated with copilot"
+  - "switching from vscode"
+  - "switching from cursor"
+  - "need a better code editor"
+  - "what code editor do you use"
+  - "what AI tools for coding"
+  - "recommend a dev tool"
+  - "tired of electron apps"
+  - "looking for native code editor"
+  - "best AI coding tool 2026"
+  - "which AI editor should I use"
+
+# ─── CONTENT TOPICS ────────────────────────────────────────────
+# Topics for original posts. Used by content_create loop.
+# Each topic is a theme to riff on — the agent picks one and
+# writes an original take.
+content_topics:
+  - "AI-assisted development workflows — what actually works vs what sounds good"
+  - "native desktop vs Electron — performance, memory, OS integration"
+  - "building in public — real challenges, not engagement bait"
+  - "code editor architecture — what decisions matter at scale"
+  - "developer experience — the small things that compound"
+  - "Rust in desktop apps — where it shines, where it's overkill"
+  - "the sidecar pattern — running AI agents as local processes"
+  - "TypeScript at scale — Zod, strict mode, what catches real bugs"
+  - "React 19 in production — what changed, what matters"
+  - "Tailwind CSS v4 — the good parts"
+  - "performance engineering — 120fps, virtualization, scroll physics"
+  - "WebKit quirks — building on WKWebView instead of Chromium"
+  - "monorepo architecture — Bun workspaces, shared crates, the tradeoffs"
+  - "the AI editor landscape — where things are heading"
+  - "shipping fast vs shipping right — when to cut corners and when not to"

@@ -30,7 +30,7 @@ bun run auth               # one-time OAuth 2.0 setup (opens browser)
 
 | Command | What |
 |---------|------|
-| `bun run watch` | **Start watchlist monitor** (edit `watchlist.yaml` to add accounts) |
+| `bun run watch` | **Start watchlist monitor** (edit `config/watchlist.yaml` to add accounts) |
 | `bun run test-auth` | Verify X API credentials |
 | `bun run auth` | OAuth 2.0 PKCE setup (one-time, opens browser) |
 | `bun run src/search.ts "<query>"` | Search posts |
@@ -55,7 +55,7 @@ bun run auth               # one-time OAuth 2.0 setup (opens browser)
 
 ## Watchlist
 
-**`watchlist.yaml`** — The simplest way to monitor accounts. Add a username, the agent watches it.
+**`config/watchlist.yaml`** — The simplest way to monitor accounts. Add a username, the agent watches it.
 
 ```yaml
 accounts:
@@ -76,7 +76,13 @@ Edit the file any time — changes picked up on next poll cycle. No restart need
 
 ## Config Files
 
-- **`watchlist.yaml`** — Accounts to monitor. One username per line under `accounts:`. This is the primary way to add/remove watched accounts.
+- **`config/watchlist.yaml`** — Accounts to monitor. One username per line under `accounts:`. This is the primary way to add/remove watched accounts.
+
+- **`config/context.md`** — Product context briefing. The agent reads this before drafting any reply or post. Contains what Orbit is, talking points, and what NOT to say.
+
+- **`config/strategy.yaml`** — Controls all loop behavior: intervals, daily limits, scheduling, global settings. Single source of truth for agent behavior.
+
+- **`config/keywords.yaml`** — Search terms organized by purpose: niche (space monitoring), solution_queries (high-intent tool seekers), content_topics (original post themes).
 
 - **`config/targets.yaml`** — Advanced config for the daemon. Contains:
   - `priority_accounts` — reply within 1 minute (with context + angles per account)

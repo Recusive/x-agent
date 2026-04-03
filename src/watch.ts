@@ -1,5 +1,5 @@
 /**
- * Watchlist monitor — polls accounts in watchlist.txt, detects new posts,
+ * Watchlist monitor — polls accounts in config/watchlist.yaml, detects new posts,
  * drafts replies, asks for permission, posts via Chrome.
  *
  * Usage: bun run src/watch.ts
@@ -12,7 +12,7 @@ import { getRepliedAuthorsToday, getRepliesTodayCount, isPostSeen, markPostSeen 
 import type { PostResult } from "./x-client.js";
 import { createXClient, searchPosts } from "./x-client.js";
 
-const WATCHLIST_PATH = new URL("../watchlist.yaml", import.meta.url).pathname;
+const WATCHLIST_PATH = new URL("../config/watchlist.yaml", import.meta.url).pathname;
 const PERSONA_PATH = new URL("../config/persona.yaml", import.meta.url).pathname;
 const POLL_INTERVAL = 45; // seconds
 
@@ -218,7 +218,7 @@ async function main(): Promise<void> {
   console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
   console.log("  X Watchlist Monitor");
   console.log(`  Polling every ${POLL_INTERVAL}s`);
-  console.log("  Edit watchlist.txt to add/remove accounts");
+  console.log("  Edit config/watchlist.yaml to add/remove accounts");
   console.log("  Ctrl+C to stop");
   console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
   console.log("");
@@ -226,7 +226,7 @@ async function main(): Promise<void> {
   while (true) {
     const handles = loadWatchlist();
     if (handles.length === 0) {
-      console.log(`${timestamp()} No accounts in watchlist.txt`);
+      console.log(`${timestamp()} No accounts in config/watchlist.yaml`);
       await sleep(POLL_INTERVAL * 1000);
       continue;
     }

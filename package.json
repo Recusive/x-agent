@@ -12,7 +12,7 @@
     "check": "bun run src/check-targets.ts",
     "test-auth": "bun run src/test-auth.ts",
     "auth": "bun run src/auth-setup.ts",
-    "watch": "bun run src/watch.ts",
+    "watch": "bun run src/agent.ts",
     "lint": "bunx biome check src/",
     "lint:fix": "bunx biome check --write src/"
   },

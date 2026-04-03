@@ -1,0 +1,99 @@
+# ═══════════════════════════════════════════════════════════════
+# X Agent Strategy — Controls all loop behavior, limits, and
+# scheduling. Daemon picks up changes on next poll cycle.
+# ═══════════════════════════════════════════════════════════════
+
+loops:
+  # ─── PRIORITY WATCH ──────────────────────────────────────────
+  # Monitor priority accounts from targets.yaml. Fastest loop.
+  # These are the accounts that move your niche — reply fast.
+  priority_watch:
+    enabled: true
+    interval_seconds: 45
+    max_replies_per_day: 10
+    max_post_age_minutes: 5
+    notify: true
+    draft_count: 3          # number of reply drafts to generate
+
+  # ─── NICHE ENGAGE ────────────────────────────────────────────
+  # Search niche keywords from keywords.yaml, engage with
+  # relevant posts from accounts in your space.
+  niche_engage:
+    enabled: true
+    interval_seconds: 600
+    max_replies_per_day: 8
+    max_post_age_minutes: 120
+    min_likes: 5
+    min_followers: 300
+
+  # ─── SOLUTION HUNT ───────────────────────────────────────────
+  # Find people actively asking for tool recommendations or
+  # frustrated with current tools. Natural product mention zone.
+  solution_hunt:
+    enabled: true
+    interval_seconds: 900
+    max_replies_per_day: 5
+    max_post_age_minutes: 240
+    mention_product: true   # OK to reference Orbit when relevant
+    min_likes: 3
+    min_followers: 200
+
+  # ─── CONTENT CREATE ──────────────────────────────────────────
+  # Original posts. Scheduled, not reactive.
+  content_create:
+    enabled: true
+    posts_per_day: 2
+    schedule:
+      - "10:00"             # morning — catches US East + Europe
+      - "16:00"             # afternoon — catches US West
+    timezone: "America/New_York"
+    topics_from: "keywords.yaml"  # content_topics section
+
+  # ─── CASUAL ENGAGE ──────────────────────────────────────────
+  # Likes and short replies to maintain presence in the feed.
+  # Low effort, high volume. Keeps the algorithm fed.
+  casual_engage:
+    enabled: true
+    interval_seconds: 1200
+    max_likes_per_day: 30
+    max_light_replies_per_day: 5
+    # Light replies: one-liners, emoji reactions, brief agreement.
+    # No drafting needed — these are fast acknowledgments.
+
+  # ─── CONVERSATION TRACK ─────────────────────────────────────
+  # Track mentions of @Orbitbuild, replies to our posts, and
+  # ongoing conversation threads we're part of.
+  conversation_track:
+    enabled: true
+    interval_seconds: 1800
+    track_mentions: true
+    track_replies_to_us: true
+    track_threads: true
+
+# ═══════════════════════════════════════════════════════════════
+# GLOBAL SETTINGS
+# ═══════════════════════════════════════════════════════════════
+
+global:
+  # Hard ceiling across ALL loops combined
+  max_total_replies_per_day: 25
+
+  # Never reply to the same person twice in one day
+  max_same_author_per_day: 1
+
+  # Only operate during these hours (local time)
+  working_hours:
+    start: 7
+    end: 23
+
+  # Push notifications via iMessage when action needed
+  notify_imessage: true
+
+  # Cooldown between any two replies (prevents burst behavior)
+  min_reply_gap_seconds: 120
+
+  # Always require human approval before posting
+  require_approval: true
+
+  # SQLite database for tracking
+  db_path: "data/x-agent.db"
