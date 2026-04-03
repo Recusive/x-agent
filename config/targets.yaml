@@ -1,0 +1,49 @@
+# Tier 1: High-priority accounts — reply within 2 minutes
+# These are the people whose posts get the most visibility in your niche
+priority_accounts:
+  - handle: "borischerny"
+    context: "Creator of Claude Code. Posts about AI dev tools, CLI design, agent architecture."
+    angles:
+      - "Building Orbit on top of Claude — real user perspective"
+      - "Technical takes on agent SDK architecture"
+      - "Developer experience insights from building a native AI editor"
+
+  - handle: "karpathy"
+    context: "AI thought leader. Posts about LLMs, coding with AI, developer workflows."
+    angles:
+      - "Practical AI-assisted development from a builder's perspective"
+      - "Code editor as the AI-native interface"
+      - "Real performance data from building with AI tools"
+
+  - handle: "swyx"
+    context: "AI Engineer community leader. Posts about AI tooling ecosystem and developer experience."
+    angles:
+      - "Desktop-native vs cloud AI tools"
+      - "AI engineering patterns in practice"
+      - "Building in public perspective"
+
+  # Add more priority accounts here:
+  # - handle: "username"
+  #   context: "Who they are and what they post about"
+  #   angles:
+  #     - "Your unique angle when replying to them"
+
+# Tier 2: Monitor accounts — reply within 15 minutes
+# Good opportunities but lower urgency
+monitor_accounts:
+  - handle: "levelsio"
+  - handle: "alexalbert__"
+  - handle: "aaborel"
+  # Add more handles here
+
+# Keywords to search for (used in keyword scan mode)
+keywords:
+  - "AI code editor"
+  - "coding assistant"
+  - "developer tools AI"
+  - "vscode alternative"
+  - "cursor vs"
+  - "claude code"
+  - "AI pair programming"
+  - "tauri app"
+  - "code editor rust"

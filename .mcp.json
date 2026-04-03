@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "x-agent": {
+      "command": "bun",
+      "args": ["run", "src/mcp-server.ts"],
+      "cwd": "/Users/no9labs/Developer/Recursive/x-agent"
+    }
+  }
+}

@@ -1,0 +1,8 @@
+.env
+node_modules/
+dist/
+data/*.db
+logs/
+queue/*.json
+bun.lockb
+*.log

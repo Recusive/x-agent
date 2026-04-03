@@ -1,0 +1,16 @@
+{
+  "name": "x-agent",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "mcp": "bun run src/mcp-server.ts",
+    "check": "bun run src/check-targets.ts",
+    "test-auth": "bun run src/test-auth.ts"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.1",
+    "twitter-api-v2": "^1.19.0",
+    "yaml": "^2.7.0",
+    "zod": "^3.25.1"
+  }
+}
