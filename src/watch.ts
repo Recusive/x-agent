@@ -7,6 +7,7 @@
 
 import { readFileSync } from "node:fs";
 import { parse } from "yaml";
+import { isConfigured as isIMessageConfigured, sendMessage, waitForReply } from "./imessage.js";
 import { getRepliedAuthorsToday, getRepliesTodayCount, isPostSeen, markPostSeen } from "./store.js";
 import type { PostResult } from "./x-client.js";
 import { createXClient, searchPosts } from "./x-client.js";
@@ -90,6 +91,37 @@ async function promptUser(question: string): Promise<string> {
   return buf.toString("utf-8", 0, n).trim();
 }
 
+async function postViaChrome(url: string, replyText: string, useIMessage: boolean): Promise<void> {
+  const { execSync } = await import("node:child_process");
+
+  console.log(`\n  🌐 Posting via Chrome: "${replyText}"`);
+  if (useIMessage) {
+    sendMessage(`⏳ Posting: "${replyText}"`);
+  }
+
+  try {
+    const agentDir = new URL("..", import.meta.url).pathname;
+    execSync(`bun run src/chrome-post.ts ${JSON.stringify(url)} ${JSON.stringify(replyText)}`, {
+      encoding: "utf-8",
+      timeout: 120000,
+      cwd: agentDir,
+    });
+    console.log("  ✅ Posted!");
+    if (useIMessage) {
+      sendMessage(`✅ Posted!\n"${replyText}"\n\n${url}`);
+    }
+  } catch {
+    execSync(`echo -n ${JSON.stringify(replyText)} | pbcopy`);
+    execSync(`open "${url}"`);
+    console.log("  ⚠ Chrome post failed. Copied to clipboard instead.");
+    if (useIMessage) {
+      sendMessage(
+        `⚠ Auto-post failed. Copied to clipboard:\n"${replyText}"\n\nCmd+V and Post.\n${url}`,
+      );
+    }
+  }
+}
+
 async function handleNewPost(post: PostResult, persona: string): Promise<void> {
   const todayCount = getRepliesTodayCount();
   const repliedAuthors = getRepliedAuthorsToday();
@@ -119,7 +151,36 @@ async function handleNewPost(post: PostResult, persona: string): Promise<void> {
   }
   console.log("");
 
-  const choice = await promptUser("  Pick (1/2/3), type custom, or 'skip': ");
+  const useIMessage = isIMessageConfigured();
+  let choice: string | null = null;
+
+  if (useIMessage) {
+    // Send options via iMessage and wait for reply
+    const url = `https://x.com/${post.author_username}/status/${post.id}`;
+    const msg = [
+      `🚨 @${post.author_username} just posted:`,
+      `"${post.text.slice(0, 200)}"`,
+      ``,
+      ...drafts.map((d, i) => `[${i + 1}] ${d}`),
+      ``,
+      `Reply 1, 2, or 3 (or "skip")`,
+      url,
+    ].join("\n");
+
+    sendMessage(msg);
+    console.log("  📱 Sent to iMessage. Waiting for your reply...");
+
+    choice = await waitForReply(180); // 3 min timeout
+
+    if (!choice) {
+      console.log("  No reply received. Skipping.\n");
+      return;
+    }
+    console.log(`  📱 Got reply: "${choice}"`);
+  } else {
+    // Fall back to terminal prompt
+    choice = await promptUser("  Pick (1/2/3), type custom, or 'skip': ");
+  }
 
   let replyText = "";
   switch (choice) {
@@ -144,13 +205,8 @@ async function handleNewPost(post: PostResult, persona: string): Promise<void> {
     return;
   }
 
-  // Copy to clipboard and open in browser
-  const { execSync } = await import("node:child_process");
-  execSync(`echo -n ${JSON.stringify(replyText)} | pbcopy`);
-  execSync(`open "https://x.com/${post.author_username}/status/${post.id}"`);
-
-  console.log(`\n  📋 Copied: "${replyText}"`);
-  console.log("  🌐 Opened in Chrome — click reply, Cmd+V, Post");
+  const url = `https://x.com/${post.author_username}/status/${post.id}`;
+  await postViaChrome(url, replyText, useIMessage);
   console.log("");
 }
 
