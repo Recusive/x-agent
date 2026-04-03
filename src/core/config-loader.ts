@@ -33,23 +33,29 @@ export interface PersonaConfig {
 }
 
 export interface StrategyConfig {
+  loops: Record<string, {
+    enabled: boolean;
+    interval_seconds?: number;
+    max_replies_per_day?: number;
+    max_likes_per_day?: number;
+    max_light_replies_per_day?: number;
+    posts_per_day?: number;
+    schedule?: Array<string>;
+    mention_product?: boolean;
+  }>;
+  global: {
+    max_total_replies_per_day: number;
+    max_same_author_per_day: number;
+    working_hours: { start: number; end: number };
+    notify_imessage: boolean;
+    cooldown_between_replies_seconds: number;
+  };
+  /** Convenience accessor mapped from global */
   limits: {
     max_replies_per_day: number;
     max_replies_per_author_per_day: number;
     max_replies_per_loop_per_day: number;
     max_likes_per_day: number;
-  };
-  timing: {
-    start_hour: number;
-    end_hour: number;
-    min_post_age_minutes: number;
-    max_post_age_minutes: number;
-  };
-  scoring: {
-    min_likes: number;
-    min_views: number;
-    freshness_weight: number;
-    engagement_weight: number;
   };
 }
 
@@ -65,23 +71,19 @@ export interface WatchlistConfig {
 // ── Defaults (used when config files don't exist yet) ────────
 
 const DEFAULT_STRATEGY: StrategyConfig = {
+  loops: {},
+  global: {
+    max_total_replies_per_day: 25,
+    max_same_author_per_day: 1,
+    working_hours: { start: 7, end: 23 },
+    notify_imessage: true,
+    cooldown_between_replies_seconds: 120,
+  },
   limits: {
-    max_replies_per_day: 20,
-    max_replies_per_author_per_day: 2,
+    max_replies_per_day: 25,
+    max_replies_per_author_per_day: 1,
     max_replies_per_loop_per_day: 10,
-    max_likes_per_day: 50,
-  },
-  timing: {
-    start_hour: 7,
-    end_hour: 23,
-    min_post_age_minutes: 0,
-    max_post_age_minutes: 120,
-  },
-  scoring: {
-    min_likes: 5,
-    min_views: 100,
-    freshness_weight: 1.5,
-    engagement_weight: 1.0,
+    max_likes_per_day: 30,
   },
 };
 
@@ -130,10 +132,29 @@ export function getPersonaRaw(): string {
   }
 }
 
-/** Read config/strategy.yaml — rate limits, timing, scoring thresholds. */
+/** Read config/strategy.yaml — loops, global settings, derived limits. */
 export function getStrategy(): StrategyConfig {
   try {
-    return parseYaml<StrategyConfig>("config/strategy.yaml");
+    const raw = parseYaml<Record<string, unknown>>("config/strategy.yaml");
+    const global = (raw.global ?? {}) as StrategyConfig["global"];
+    const loops = (raw.loops ?? {}) as StrategyConfig["loops"];
+
+    return {
+      loops,
+      global: {
+        max_total_replies_per_day: global.max_total_replies_per_day ?? 25,
+        max_same_author_per_day: global.max_same_author_per_day ?? 1,
+        working_hours: global.working_hours ?? { start: 7, end: 23 },
+        notify_imessage: global.notify_imessage ?? true,
+        cooldown_between_replies_seconds: global.cooldown_between_replies_seconds ?? 120,
+      },
+      limits: {
+        max_replies_per_day: global.max_total_replies_per_day ?? 25,
+        max_replies_per_author_per_day: global.max_same_author_per_day ?? 1,
+        max_replies_per_loop_per_day: 10,
+        max_likes_per_day: (loops.casual_engage as Record<string, unknown>)?.max_likes_per_day as number ?? 30,
+      },
+    };
   } catch {
     return DEFAULT_STRATEGY;
   }
